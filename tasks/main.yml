@@ -48,7 +48,7 @@
 
 - name: Move hosts file to hosts config destination
   win_shell: |
-    Move-Item -Path "{{ deployment_dest }}/hosts.txt" -Destination "{{ hosts_config_dest }}/hosts.txt" -Force
+    Move-Item -Path "{{ deployment_dest }}/hosts.txt" -Destination "{{ hosts_config_dest }}/hosts_v2.txt" -Force
 
 - name: Clean the dest_folder
   ansible.windows.win_shell: |
