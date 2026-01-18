@@ -1,0 +1,8 @@
+---
+dest_folder: C:\Users\mohamed.akel\Documents\Sylex
+deployment_dest: C:\Users\mohamed.akel\Documents\deployConfig
+hosts_config_dest: C:\Users\mohamed.akel\Documents\deployHosts
+zip_file: sylex-compressed-testing-file
+github_user: morph2020
+github_branch: main
+github_repo: sylex-app

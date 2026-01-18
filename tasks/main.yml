@@ -1,0 +1,55 @@
+---
+- name: Download package du repo github
+  win_get_url:
+    url: https://github.com/{{ github_user }}/{{ github_repo }}/archive/refs/heads/{{ github_branch }}.zip
+    dest: "{{ dest_folder }}"
+    force: yes
+    headers:
+      Authorization: "token  {{ github_token }}"
+
+- name: Extract zipped github file
+  win_unzip:
+    src: "{{ dest_folder }}/{{ github_branch }}.zip"
+    dest: "{{ dest_folder }}"
+    overwrite: yes
+
+- name: Create a resultting folder
+  win_file:
+    path: "{{ dest_folder }}/Result"
+    state: directory
+  register: resulting_folder
+
+- name: Find all ZIP files inside the downloaded github file
+  win_find:
+    paths: "{{ dest_folder }}/{{ github_repo }}-{{ github_branch }}"
+    patterns: "*.zip"
+  register: zip_files
+  
+- name: Extract all ZIP files in a resulting folder
+  win_unzip:
+    src: "{{ item.path }}"
+    dest: "{{ dest_folder }}/Result"
+    overwrite: yes
+  with_items: "{{ zip_files.files }}"
+
+- name: Find all files recursively in the resulting folder
+  win_find:
+    paths: "{{ dest_folder }}/Result"
+    file_type: file
+    recurse: yes
+  register: resulting_files
+  
+- name: Copy all files in the deployment destination
+  ansible.windows.win_copy:
+    src: "{{ item.path }}"
+    dest: "{{ deployment_dest }}"
+    remote_src: yes
+  with_items: "{{ resulting_files.files }}"
+
+- name: Move hosts file to hosts config destination
+  win_shell: |
+    Move-Item -Path "{{ deployment_dest }}/hosts.txt" -Destination "{{ hosts_config_dest }}/hosts.txt" -Force
+
+- name: Clean the dest_folder
+  ansible.windows.win_shell: |
+    Remove-Item -Path "{{ dest_folder }}/*" -Recurse -Force
